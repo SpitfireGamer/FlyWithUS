@@ -13,9 +13,7 @@
     "start": "node server/index.js"
   },
   "dependencies": {
-    "gsap": "^3.12.7"
-  },
-  "devDependencies": {
+    "gsap": "^3.12.7",
     "vite": "^6.3.2"
   }
 }
