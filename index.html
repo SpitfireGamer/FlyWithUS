@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlyWithUS — Experience The World | Book Premium Flights</title>
+  <meta name="description" content="Explore the world with FlyWithUS. Book premium flights to Paris, New York, Cairo and 200+ destinations. Real-time flight tracking, best fares, unforgettable journeys." />
+  <meta name="keywords" content="flights, airline, book flights, premium travel, FlyWithUS, flight tracker, world destinations" />
+  <meta name="author" content="FlyWithUS Airlines" />
+  <link rel="canonical" href="https://flywithus.com/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="FlyWithUS — Experience The World" />
+  <meta property="og:description" content="Book premium flights to 200+ destinations worldwide. Real-time flight tracking and unbeatable fares." />
+  <meta property="og:url" content="https://flywithus.com/" />
+  <meta property="og:site_name" content="FlyWithUS Airlines" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="FlyWithUS — Experience The World" />
+  <meta name="twitter:description" content="Book premium flights to 200+ destinations worldwide." />
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Airline",
+    "name": "FlyWithUS",
+    "url": "https://flywithus.com",
+    "description": "Premium airline offering flights to 200+ destinations worldwide",
+    "foundingDate": "1933"
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <!-- ═══════════════════════════════════════ -->
+  <!-- CUSTOM CURSOR -->
+  <!-- ═══════════════════════════════════════ -->
+  <div id="cursor-dot" class="cursor-dot"></div>
+  <div id="cursor-ring" class="cursor-ring"></div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- LOADER -->
+  <!-- ═══════════════════════════════════════ -->
+  <div id="loader" class="loader">
+    <div class="loader__inner">
+      <div class="loader__plane">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M56 28H42L32 8h-6l5 20H18l-4-6h-4l2 10-2 10h4l4-6h13l-5 20h6l10-20h14c2.2 0 4-1.8 4-4s-1.8-4-4-4z" fill="#B0E4CC"/>
+        </svg>
+      </div>
+      <div class="loader__text">
+        <span class="loader__letter" style="--i:0">F</span>
+        <span class="loader__letter" style="--i:1">L</span>
+        <span class="loader__letter" style="--i:2">Y</span>
+        <span class="loader__letter" style="--i:3">W</span>
+        <span class="loader__letter" style="--i:4">I</span>
+        <span class="loader__letter" style="--i:5">T</span>
+        <span class="loader__letter" style="--i:6">H</span>
+        <span class="loader__letter" style="--i:7">U</span>
+        <span class="loader__letter" style="--i:8">S</span>
+      </div>
+      <div class="loader__bar">
+        <div class="loader__bar-fill" id="loader-bar-fill"></div>
+      </div>
+      <p class="loader__sub">Preparing your journey...</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- PARTICLE CANVAS (Background atmosphere) -->
+  <!-- ═══════════════════════════════════════ -->
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- NAVIGATION -->
+  <!-- ═══════════════════════════════════════ -->
+  <nav id="navbar" class="navbar">
+    <div class="navbar__inner">
+      <a href="#" class="navbar__logo" data-hover>
+        <svg class="navbar__logo-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M56 28H42L32 8h-6l5 20H18l-4-6h-4l2 10-2 10h4l4-6h13l-5 20h6l10-20h14c2.2 0 4-1.8 4-4s-1.8-4-4-4z" fill="#B0E4CC"/>
+        </svg>
+        <span>FLYWITHUS</span>
+      </a>
+      <!-- Hamburger Menu Button (mobile) -->
+      <button class="navbar__hamburger" id="hamburger-btn" aria-label="Toggle navigation menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="navbar__links" id="navbar-links">
+        <a href="#destinations" class="navbar__link" data-hover>Destinations</a>
+        <a href="#experience" class="navbar__link" data-hover>Experience</a>
+        <a href="#fleet" class="navbar__link" data-hover>Our Fleet</a>
+        <a href="#about" class="navbar__link" data-hover>About</a>
+        <a href="#live-tracker" class="navbar__link" data-hover>Live Flights</a>
+        <a href="#flight-map" class="navbar__link" data-hover>World Map</a>
+      </div>
+      <!-- Auth-aware right side -->
+      <div class="navbar__auth" id="navbar-auth">
+        <a href="/login.html" class="navbar__cta" data-hover id="nav-signin">
+          <span>Sign In</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+        </a>
+        <!-- Shown when logged in -->
+        <div class="navbar__user" id="nav-user" style="display:none;">
+          <div class="navbar__avatar" id="nav-avatar"></div>
+          <div class="navbar__user-dropdown" id="nav-dropdown">
+            <span class="navbar__user-name" id="nav-user-name"></span>
+            <a href="#book" class="navbar__dd-link">Book Flight</a>
+            <a href="/admin.html" class="navbar__dd-link navbar__dd-admin" id="nav-admin-link" style="display:none;">Admin Dashboard</a>
+            <button class="navbar__dd-logout" id="btn-logout">Sign Out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- HERO SECTION -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="hero" class="hero">
+    <div class="hero__bg-gradient"></div>
+    <div class="hero__content">
+      <p class="hero__tagline">WORLD-CLASS AVIATION SINCE 1933</p>
+      <h1 class="hero__title">
+        <span class="hero__title-line">Experience</span>
+        <span class="hero__title-line hero__title-line--accent">The World</span>
+        <span class="hero__title-line">Above</span>
+      </h1>
+      <p class="hero__desc">Connecting continents with elegance. From the Eiffel Tower to the Pyramids — every flight is a masterpiece.</p>
+      <div class="hero__actions">
+        <a href="#story" class="btn btn--primary" data-hover>
+          <span>Begin Your Journey</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </a>
+        <a href="#destinations" class="btn btn--ghost" data-hover>
+          <span>Explore Destinations</span>
+        </a>
+      </div>
+    </div>
+    <div class="hero__scroll-indicator" id="scroll-indicator">
+      <div class="hero__scroll-line"></div>
+      <span>Scroll to explore</span>
+    </div>
+    <!-- Floating decorative elements -->
+    <div class="hero__float hero__float--1"></div>
+    <div class="hero__float hero__float--2"></div>
+    <div class="hero__float hero__float--3"></div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SCROLLYTELLING — FRAME SEQUENCE SECTION -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="story" class="story">
+    <canvas id="frame-canvas" class="story__canvas"></canvas>
+    
+    <!-- Overlay text panels that appear during scroll -->
+    <div class="story__overlay">
+      <div class="story__panel story__panel--1" data-frame-start="0" data-frame-end="15">
+        <div class="story__panel-glass">
+          <p class="story__panel-tag">NEW YORK · USA</p>
+          <h2 class="story__panel-title">From the Heart of Manhattan</h2>
+          <p class="story__panel-desc">Departing from the city that never sleeps, our fleet rises above the iconic skyline — past the Statue of Liberty, carrying dreams across the Atlantic.</p>
+          <div class="story__panel-stat">
+            <div class="stat">
+              <span class="stat__number" data-count="87">0</span>
+              <span class="stat__label">Daily Flights</span>
+            </div>
+            <div class="stat">
+              <span class="stat__number" data-count="12">0</span>
+              <span class="stat__label">US Airports</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="story__panel story__panel--2" data-frame-start="16" data-frame-end="35">
+        <div class="story__panel-glass">
+          <p class="story__panel-tag">PARIS · FRANCE</p>
+          <h2 class="story__panel-title">Into the City of Light</h2>
+          <p class="story__panel-desc">Gliding past the Eiffel Tower, our home awaits. Paris — where every arrival feels like the first time. The world's most beautiful city unfolds below.</p>
+          <div class="story__panel-stat">
+            <div class="stat">
+              <span class="stat__number" data-count="350">0</span>
+              <span class="stat__label">Global Routes</span>
+            </div>
+            <div class="stat">
+              <span class="stat__number" data-count="52">0</span>
+              <span class="stat__label">Countries</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="story__panel story__panel--3" data-frame-start="36" data-frame-end="60">
+        <div class="story__panel-glass">
+          <p class="story__panel-tag">CAIRO · EGYPT</p>
+          <h2 class="story__panel-title">Where History Meets Horizon</h2>
+          <p class="story__panel-desc">Soaring over the Great Pyramids and the enigmatic Sphinx — connecting the ancient world to the modern. Adventure awaits in every direction.</p>
+          <div class="story__panel-stat">
+            <div class="stat">
+              <span class="stat__number" data-count="98">0</span><span class="stat__label-pct">%</span>
+              <span class="stat__label">On-time Rate</span>
+            </div>
+            <div class="stat">
+              <span class="stat__number" data-count="90">0</span><span class="stat__label-pct">M+</span>
+              <span class="stat__label">Passengers/Year</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- DESTINATIONS SECTION -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="destinations" class="destinations">
+    <div class="destinations__header">
+      <p class="section-tag reveal-text">WHERE WE FLY</p>
+      <h2 class="section-title reveal-text">Discover Your Next<br/><span class="text-accent">Destination</span></h2>
+      <p class="section-desc reveal-text">From iconic capitals to hidden gems — explore 350+ routes across 52 countries on every continent.</p>
+    </div>
+    <div class="destinations__grid">
+      <div class="dest-card dest-card--large" data-tilt data-hover>
+        <div class="dest-card__img" style="background-image: url('https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80')"></div>
+        <div class="dest-card__overlay"></div>
+        <div class="dest-card__content">
+          <span class="dest-card__tag">Most Popular</span>
+          <h3 class="dest-card__city">Paris</h3>
+          <p class="dest-card__country">France</p>
+          <div class="dest-card__price">From <strong>$299</strong></div>
+        </div>
+        <div class="dest-card__glow"></div>
+      </div>
+      <div class="dest-card" data-tilt data-hover>
+        <div class="dest-card__img" style="background-image: url('https://images.unsplash.com/photo-1485738422979-f5c462d49f04?w=800&q=80')"></div>
+        <div class="dest-card__overlay"></div>
+        <div class="dest-card__content">
+          <span class="dest-card__tag">Adventure</span>
+          <h3 class="dest-card__city">New York</h3>
+          <p class="dest-card__country">United States</p>
+          <div class="dest-card__price">From <strong>$449</strong></div>
+        </div>
+        <div class="dest-card__glow"></div>
+      </div>
+      <div class="dest-card" data-tilt data-hover>
+        <div class="dest-card__img" style="background-image: url('https://images.unsplash.com/photo-1539768942893-daf53e736b68?w=800&q=80')"></div>
+        <div class="dest-card__overlay"></div>
+        <div class="dest-card__content">
+          <span class="dest-card__tag">Heritage</span>
+          <h3 class="dest-card__city">Cairo</h3>
+          <p class="dest-card__country">Egypt</p>
+          <div class="dest-card__price">From <strong>$389</strong></div>
+        </div>
+        <div class="dest-card__glow"></div>
+      </div>
+      <div class="dest-card" data-tilt data-hover>
+        <div class="dest-card__img" style="background-image: url('https://images.unsplash.com/photo-1513407030348-c983a97b98d8?w=800&q=80')"></div>
+        <div class="dest-card__overlay"></div>
+        <div class="dest-card__content">
+          <span class="dest-card__tag">Trending</span>
+          <h3 class="dest-card__city">Tokyo</h3>
+          <p class="dest-card__country">Japan</p>
+          <div class="dest-card__price">From <strong>$599</strong></div>
+        </div>
+        <div class="dest-card__glow"></div>
+      </div>
+      <div class="dest-card dest-card--large" data-tilt data-hover>
+        <div class="dest-card__img" style="background-image: url('https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=800&q=80')"></div>
+        <div class="dest-card__overlay"></div>
+        <div class="dest-card__content">
+          <span class="dest-card__tag">Exotic</span>
+          <h3 class="dest-card__city">Sydney</h3>
+          <p class="dest-card__country">Australia</p>
+          <div class="dest-card__price">From <strong>$799</strong></div>
+        </div>
+        <div class="dest-card__glow"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- EXPERIENCE SECTION (Features) -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="experience" class="experience">
+    <div class="experience__header">
+      <p class="section-tag reveal-text">THE FLYWITHUS DIFFERENCE</p>
+      <h2 class="section-title reveal-text">A Journey, Not<br/><span class="text-accent">Just A Flight</span></h2>
+    </div>
+    <div class="experience__grid">
+      <div class="exp-card" data-hover>
+        <div class="exp-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3 class="exp-card__title">First-Class Suites</h3>
+        <p class="exp-card__desc">Private suites with lie-flat beds, personal entertainment systems, and Michelin-star dining at 35,000 feet.</p>
+      </div>
+      <div class="exp-card" data-hover>
+        <div class="exp-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <h3 class="exp-card__title">On-Time, Every Time</h3>
+        <p class="exp-card__desc">98% on-time performance. Because your time matters more than anything. Real-time tracking at your fingertips.</p>
+      </div>
+      <div class="exp-card" data-hover>
+        <div class="exp-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3 class="exp-card__title">Safety First</h3>
+        <p class="exp-card__desc">7-star safety rating. Advanced fleet maintenance and the industry's most rigorous pilot training program.</p>
+      </div>
+      <div class="exp-card" data-hover>
+        <div class="exp-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <h3 class="exp-card__title">Global Lounges</h3>
+        <p class="exp-card__desc">Access 650+ premium lounges worldwide. Champagne bars, spa treatments, and gourmet cuisine before takeoff.</p>
+      </div>
+      <div class="exp-card" data-hover>
+        <div class="exp-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <h3 class="exp-card__title">Seamless Booking</h3>
+        <p class="exp-card__desc">Book in 60 seconds. Flexible tickets, instant confirmations, and 24/7 concierge support for every passenger.</p>
+      </div>
+      <div class="exp-card" data-hover>
+        <div class="exp-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        </div>
+        <h3 class="exp-card__title">Carbon Neutral</h3>
+        <p class="exp-card__desc">Committed to net-zero by 2030. SAF-powered fleet, carbon offset programs, and the greenest fleet in the sky.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- FLEET SECTION (Parallax) -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="fleet" class="fleet">
+    <div class="fleet__parallax-bg" data-parallax data-speed="0.3"></div>
+    <div class="fleet__content">
+      <p class="section-tag reveal-text">OUR FLEET</p>
+      <h2 class="section-title reveal-text">Engineering<br/><span class="text-accent">Excellence</span></h2>
+      <div class="fleet__stats">
+        <div class="fleet-stat reveal-text">
+          <span class="fleet-stat__number" data-count="224">0</span>
+          <span class="fleet-stat__label">Aircraft</span>
+        </div>
+        <div class="fleet-stat reveal-text" data-delay="0.1">
+          <span class="fleet-stat__number" data-count="6">0</span>
+          <span class="fleet-stat__label">Aircraft Types</span>
+        </div>
+        <div class="fleet-stat reveal-text" data-delay="0.2">
+          <span class="fleet-stat__number" data-count="9.2">0</span>
+          <span class="fleet-stat__label">Avg. Fleet Age (yrs)</span>
+        </div>
+      </div>
+      <p class="fleet__desc reveal-text">From the revolutionary A380 superjumbo to the fuel-efficient A350 — our fleet represents the pinnacle of modern aviation engineering.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- TESTIMONIALS -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="about" class="testimonials">
+    <div class="testimonials__header">
+      <p class="section-tag reveal-text">WHAT TRAVELERS SAY</p>
+      <h2 class="section-title reveal-text">Stories From<br/><span class="text-accent">The Skies</span></h2>
+    </div>
+    <div class="testimonials__track">
+      <div class="test-card" data-hover>
+        <div class="test-card__stars">★★★★★</div>
+        <p class="test-card__text">"The scrollytelling experience on their website was just the beginning — the actual flight to Paris surpassed every expectation. Truly world-class."</p>
+        <div class="test-card__author">
+          <div class="test-card__avatar">EP</div>
+          <div>
+            <p class="test-card__name">Elena Petrova</p>
+            <p class="test-card__route">Moscow → Paris</p>
+          </div>
+        </div>
+      </div>
+      <div class="test-card" data-hover>
+        <div class="test-card__stars">★★★★★</div>
+        <p class="test-card__text">"First class on the A380 is an experience money can't normally buy. The private suite, the champagne, the views from 35,000 feet — magical."</p>
+        <div class="test-card__author">
+          <div class="test-card__avatar">JT</div>
+          <div>
+            <p class="test-card__name">James Thornton</p>
+            <p class="test-card__route">New York → Tokyo</p>
+          </div>
+        </div>
+      </div>
+      <div class="test-card" data-hover>
+        <div class="test-card__stars">★★★★★</div>
+        <p class="test-card__text">"Flying over the pyramids on approach to Cairo... I'll never forget it. FlyWithUS turned a simple flight into a story I tell everyone."</p>
+        <div class="test-card__author">
+          <div class="test-card__avatar">SM</div>
+          <div>
+            <p class="test-card__name">Sofia Martínez</p>
+            <p class="test-card__route">Barcelona → Cairo</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- BOOKING SECTION — MULTI-STEP -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="book" class="cta-section">
+    <div class="cta-section__bg"></div>
+    <div class="cta-section__content">
+      <p class="section-tag reveal-text">YOUR ADVENTURE AWAITS</p>
+      <h2 class="cta-section__title reveal-text">Ready to<br/><span class="text-accent">Take Off?</span></h2>
+      <p class="cta-section__desc reveal-text">Search flights across 5000+ airports worldwide. Book in under 60 seconds.</p>
+
+      <!-- Booking Steps Indicator -->
+      <div class="booking-steps" id="booking-steps">
+        <div class="booking-step active" data-step="1"><span class="booking-step__num">1</span><span class="booking-step__label">Search</span></div>
+        <div class="booking-step__line"></div>
+        <div class="booking-step" data-step="2"><span class="booking-step__num">2</span><span class="booking-step__label">Results</span></div>
+        <div class="booking-step__line"></div>
+        <div class="booking-step" data-step="3"><span class="booking-step__num">3</span><span class="booking-step__label">Passengers</span></div>
+        <div class="booking-step__line"></div>
+        <div class="booking-step" data-step="4"><span class="booking-step__num">4</span><span class="booking-step__label">Confirmed</span></div>
+      </div>
+
+      <!-- STEP 1: SEARCH FLIGHTS -->
+      <div class="booking-panel" id="booking-step-1">
+        <div class="booking-form reveal-text" data-delay="0.2">
+          <div class="booking-form__field booking-form__field--auto">
+            <label>From</label>
+            <input type="text" id="search-from" placeholder="City or airport code..." autocomplete="off" />
+            <div class="autocomplete-results" id="autocomplete-from"></div>
+            <input type="hidden" id="search-from-iata" />
+          </div>
+          <div class="booking-form__swap" id="swap-airports" data-hover>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16l-4-4 4-4M17 8l4 4-4 4M3 12h18"/></svg>
+          </div>
+          <div class="booking-form__field booking-form__field--auto">
+            <label>To</label>
+            <input type="text" id="search-to" placeholder="City or airport code..." autocomplete="off" />
+            <div class="autocomplete-results" id="autocomplete-to"></div>
+            <input type="hidden" id="search-to-iata" />
+          </div>
+          <div class="booking-form__field">
+            <label>Date</label>
+            <input type="date" id="search-date" />
+          </div>
+          <div class="booking-form__field">
+            <label>Passengers</label>
+            <select id="search-passengers">
+              <option value="1">1 Passenger</option>
+              <option value="2">2 Passengers</option>
+              <option value="3">3 Passengers</option>
+              <option value="4">4 Passengers</option>
+              <option value="5">5 Passengers</option>
+              <option value="6">6 Passengers</option>
+            </select>
+          </div>
+          <div class="booking-form__field">
+            <label>Class</label>
+            <select id="search-class">
+              <option value="economy">Economy</option>
+              <option value="premiumEconomy">Premium Economy</option>
+              <option value="business">Business</option>
+              <option value="first">First Class</option>
+            </select>
+          </div>
+          <button class="btn btn--primary btn--large" id="btn-search-flights" data-hover>
+            <span>Search Flights</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: FLIGHT RESULTS -->
+      <div class="booking-panel hidden" id="booking-step-2">
+        <div class="flight-results__header">
+          <button class="btn btn--ghost btn--sm" id="btn-back-search" data-hover>← Back to Search</button>
+          <h3 class="flight-results__route" id="results-route"></h3>
+          <p class="flight-results__count" id="results-count"></p>
+        </div>
+        <div class="flight-results__list" id="flight-results-list">
+          <!-- Flight cards injected by JS -->
+        </div>
+        <div class="flight-results__empty hidden" id="no-flights">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--white-30)" stroke-width="1"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <p>No flights found for this route</p>
+          <p class="flight-results__empty-sub">Try different dates or airports</p>
+        </div>
+      </div>
+
+      <!-- STEP 3: PASSENGER DETAILS -->
+      <div class="booking-panel hidden" id="booking-step-3">
+        <div class="passenger-form">
+          <button class="btn btn--ghost btn--sm" id="btn-back-results" data-hover>← Back to Results</button>
+          <div class="passenger-form__summary" id="passenger-summary"></div>
+          <div class="passenger-form__fields" id="passenger-fields">
+            <!-- Passenger forms injected by JS -->
+          </div>
+          <div class="passenger-form__contact">
+            <h4>Contact Information</h4>
+            <div class="passenger-form__row">
+              <div class="booking-form__field">
+                <label>Email *</label>
+                <input type="email" id="contact-email" placeholder="your@email.com" required />
+              </div>
+              <div class="booking-form__field">
+                <label>Phone</label>
+                <input type="tel" id="contact-phone" placeholder="+91 98765 43210" />
+              </div>
+            </div>
+          </div>
+          <div class="passenger-form__total" id="booking-total"></div>
+          <button class="btn btn--primary btn--large" id="btn-confirm-booking" data-hover>
+            <span>Confirm Booking</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 4: CONFIRMATION -->
+      <div class="booking-panel hidden" id="booking-step-4">
+        <div class="booking-confirmation">
+          <div class="booking-confirmation__icon">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--cream)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/></svg>
+          </div>
+          <h3 class="booking-confirmation__title">Booking Confirmed!</h3>
+          <div class="booking-confirmation__pnr" id="confirm-pnr"></div>
+          <div class="booking-confirmation__details" id="confirm-details"></div>
+          <button class="btn btn--primary" id="btn-new-booking" data-hover>
+            <span>Book Another Flight</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- BOOKING LOOKUP -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="lookup" class="lookup-section">
+    <div class="lookup-section__content">
+      <p class="section-tag reveal-text">MANAGE YOUR TRIP</p>
+      <h2 class="section-title reveal-text">Check Your <span class="text-accent">Booking</span></h2>
+      <div class="lookup-form reveal-text">
+        <div class="booking-form__field">
+          <label>PNR Code</label>
+          <input type="text" id="lookup-pnr" placeholder="e.g. ABC123" maxlength="6" />
+        </div>
+        <div class="booking-form__field">
+          <label>Email</label>
+          <input type="email" id="lookup-email" placeholder="your@email.com" />
+        </div>
+        <button class="btn btn--primary" id="btn-lookup" data-hover>
+          <span>Find Booking</span>
+        </button>
+      </div>
+      <div class="lookup-result hidden" id="lookup-result"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- LIVE FLIGHT TRACKER -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="live-tracker" class="live-tracker">
+    <div class="live-tracker__header">
+      <p class="section-tag reveal-text">REAL-TIME TRACKING</p>
+      <h2 class="section-title reveal-text">Live Flights<br/><span class="text-accent">In The Sky</span></h2>
+      <p class="section-desc reveal-text">Powered by OpenSky Network — tracking aircraft around the world in real-time.</p>
+    </div>
+    <div class="live-tracker__controls">
+      <button class="btn btn--ghost btn--sm" id="btn-refresh-tracker" data-hover>🔄 Refresh</button>
+      <span class="live-tracker__status" id="tracker-status">Loading...</span>
+    </div>
+    <div class="live-tracker__grid" id="live-flights-grid">
+      <!-- Live flight cards injected by JS -->
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- LIVE WORLD FLIGHT MAP -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="flight-map" class="flight-map">
+    <div class="flight-map__header">
+      <p class="section-tag reveal-text">GLOBAL FLIGHT RADAR</p>
+      <h2 class="section-title reveal-text">Aircraft Across<br/><span class="text-accent">The World</span></h2>
+      <p class="section-desc reveal-text">Real-time visualization of thousands of aircraft currently in flight worldwide.</p>
+    </div>
+    <div class="flight-map__stats" id="map-stats">
+      <div class="flight-map__stat">
+        <span class="flight-map__stat-value" id="map-stat-planes">—</span>
+        <span class="flight-map__stat-label">Aircraft In Flight</span>
+      </div>
+      <div class="flight-map__stat">
+        <span class="flight-map__stat-value" id="map-stat-countries">—</span>
+        <span class="flight-map__stat-label">Countries</span>
+      </div>
+      <div class="flight-map__stat">
+        <span class="flight-map__stat-value" id="map-stat-alt">—</span>
+        <span class="flight-map__stat-label">Avg Altitude (m)</span>
+      </div>
+      <div class="flight-map__stat">
+        <span class="flight-map__stat-value" id="map-stat-speed">—</span>
+        <span class="flight-map__stat-label">Avg Speed (km/h)</span>
+      </div>
+    </div>
+    <div class="flight-map__container" id="flight-map-container" style="height: 600px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06);"></div>
+    <div class="flight-map__controls">
+      <button class="btn btn--ghost btn--sm" id="btn-refresh-map" data-hover>🔄 Refresh Data</button>
+      <span class="flight-map__update" id="map-update-time">Last updated: —</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- FOOTER -->
+  <!-- ═══════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="footer__logo">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M56 28H42L32 8h-6l5 20H18l-4-6h-4l2 10-2 10h4l4-6h13l-5 20h6l10-20h14c2.2 0 4-1.8 4-4s-1.8-4-4-4z" fill="#B0E4CC"/>
+          </svg>
+          <span>FLYWITHUS</span>
+        </div>
+        <p class="footer__tagline">Connecting continents with elegance since 1933.</p>
+      </div>
+      <div class="footer__links">
+        <div class="footer__col">
+          <h4>Explore</h4>
+          <a href="#" data-hover>Destinations</a>
+          <a href="#" data-hover>Flight Status</a>
+          <a href="#" data-hover>Manage Booking</a>
+          <a href="#" data-hover>Loyalty Program</a>
+        </div>
+        <div class="footer__col">
+          <h4>Company</h4>
+          <a href="#" data-hover>About Us</a>
+          <a href="#" data-hover>Careers</a>
+          <a href="#" data-hover>Press</a>
+          <a href="#" data-hover>Sustainability</a>
+        </div>
+        <div class="footer__col">
+          <h4>Support</h4>
+          <a href="#" data-hover>Help Center</a>
+          <a href="#" data-hover>Contact</a>
+          <a href="#" data-hover>Accessibility</a>
+          <a href="#" data-hover>Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p>&copy; 2026 FlyWithUS. All rights reserved. Made with passion for aviation.</p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script type="module" src="/main.js"></script>
+</body>
+</html>

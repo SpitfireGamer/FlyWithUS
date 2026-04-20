@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — FlyWithUS</title>
+  <meta name="description" content="Sign in to your FlyWithUS account. Book flights, manage reservations, and explore the world." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080d1a;
+      --bg-card: rgba(13,22,40,0.85);
+      --border: rgba(255,255,255,0.06);
+      --cream: #f5e6c8;
+      --cream-dim: rgba(245,230,200,0.5);
+      --blue: #4a8bb5;
+      --blue-glow: rgba(74,139,181,0.25);
+      --green: #6dd5a0;
+      --red: #e76e6e;
+      --white: #eae5dc;
+      --white-70: rgba(234,229,220,0.7);
+      --white-50: rgba(234,229,220,0.5);
+      --white-30: rgba(234,229,220,0.3);
+      --white-10: rgba(234,229,220,0.1);
+      --white-05: rgba(234,229,220,0.05);
+      --font-display: 'Instrument Serif', serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* ─── Background ─── */
+    .auth-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .auth-bg__img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.3) saturate(1.2);
+    }
+
+    .auth-bg__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(8,13,26,0.85), rgba(8,13,26,0.6), rgba(74,139,181,0.1));
+    }
+
+    /* ─── Card ─── */
+    .auth-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 440px;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 48px 40px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+    }
+
+    .auth-card__logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .auth-card__logo a {
+      font-family: var(--font-display);
+      font-size: 28px;
+      color: var(--cream);
+      text-decoration: none;
+    }
+
+    .auth-card__logo-sub {
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--white-30);
+      margin-top: 4px;
+    }
+
+    /* ─── Tabs ─── */
+    .auth-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--white-05);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--white-30);
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .auth-tab.active {
+      background: var(--blue);
+      color: var(--cream);
+      box-shadow: 0 4px 16px var(--blue-glow);
+    }
+
+    /* ─── Forms ─── */
+    .auth-panel { display: none; }
+    .auth-panel.active { display: block; }
+
+    .auth-field {
+      margin-bottom: 16px;
+    }
+
+    .auth-field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--white-30);
+      margin-bottom: 6px;
+    }
+
+    .auth-field input {
+      width: 100%;
+      background: var(--white-05);
+      border: 1px solid var(--white-10);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .auth-field input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-glow);
+    }
+
+    .auth-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--blue), #3a7a9a);
+      color: var(--cream);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      margin-top: 8px;
+    }
+
+    .auth-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px var(--blue-glow);
+    }
+
+    .auth-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 20px 0;
+      color: var(--white-30);
+      font-size: 12px;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--white-10);
+    }
+
+    /* Google button wrapper */
+    .google-btn-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .google-btn {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--white-10);
+      border-radius: 12px;
+      background: var(--white-05);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .google-btn:hover {
+      background: var(--white-10);
+      border-color: var(--white-30);
+    }
+
+    .google-btn svg { width: 18px; height: 18px; }
+
+    .auth-msg {
+      text-align: center;
+      font-size: 13px;
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .auth-msg--error {
+      background: rgba(231,110,110,0.1);
+      color: var(--red);
+      display: block;
+    }
+
+    .auth-msg--success {
+      background: rgba(109,213,160,0.1);
+      color: var(--green);
+      display: block;
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--white-30);
+    }
+
+    .auth-footer a {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .auth-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--white-30);
+      text-decoration: none;
+      font-size: 13px;
+      margin-bottom: 16px;
+      transition: color 0.3s ease;
+    }
+
+    .auth-back:hover { color: var(--cream); }
+
+    @media (max-width: 480px) {
+      .auth-card { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ BACKGROUND ═══ -->
+  <div class="auth-bg">
+    <img src="/plane-bg.png" alt="" class="auth-bg__img" />
+    <div class="auth-bg__overlay"></div>
+  </div>
+
+  <!-- ═══ LOGIN CARD ═══ -->
+  <div class="auth-wrapper">
+    <a href="/" class="auth-back">← Back to FlyWithUS</a>
+
+    <div class="auth-card">
+      <div class="auth-card__logo">
+        <a href="/">FlyWithUS</a>
+        <p class="auth-card__logo-sub">Sign in to your account</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="user">Traveler</button>
+        <button class="auth-tab" data-tab="admin">Admin</button>
+      </div>
+
+      <!-- ═══ USER LOGIN ═══ -->
+      <div class="auth-panel active" id="panel-user">
+        <button class="google-btn" id="btn-google-login">
+          <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Sign in with Google
+        </button>
+
+        <div class="auth-divider">or</div>
+
+        <form id="form-user-login">
+          <div class="auth-field">
+            <label>Email</label>
+            <input type="email" id="user-email" placeholder="your@email.com" required />
+          </div>
+          <div class="auth-field">
+            <label>Password</label>
+            <input type="password" id="user-password" placeholder="Enter password" required />
+          </div>
+          <button type="submit" class="auth-btn">Sign In</button>
+        </form>
+
+        <div class="auth-msg" id="user-msg"></div>
+
+        <!-- OTP Verify (hidden until needed) -->
+        <div id="otp-section" style="display:none; margin-top:16px;">
+          <div class="auth-field">
+            <label>Verification Code</label>
+            <input type="text" id="otp-code" placeholder="Enter 6-digit code" maxlength="6" style="text-align:center; font-size:20px; letter-spacing:6px;" />
+          </div>
+          <button class="auth-btn" id="btn-verify-otp">Verify Email</button>
+        </div>
+
+        <div class="auth-footer">
+          Don't have an account? <a href="/register.html">Create one</a>
+        </div>
+      </div>
+
+      <!-- ═══ ADMIN LOGIN ═══ -->
+      <div class="auth-panel" id="panel-admin">
+        <form id="form-admin-login">
+          <div class="auth-field">
+            <label>Admin Secret Key</label>
+            <input type="password" id="admin-secret" placeholder="Enter admin secret..." required />
+          </div>
+          <button type="submit" class="auth-btn">Access Dashboard</button>
+        </form>
+        <div class="auth-msg" id="admin-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    const API = '/api';
+    let pendingEmail = '';
+
+    // ═══ TAB SWITCHING ═══
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+      });
+    });
+
+    // ═══ USER EMAIL/PASSWORD LOGIN ═══
+    document.getElementById('form-user-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('user-email').value.trim();
+      const password = document.getElementById('user-password').value;
+      const msgEl = document.getElementById('user-msg');
+
+      if (!email || !password) return;
+
+      try {
+        const res = await fetch(`${API}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          msgEl.className = 'auth-msg auth-msg--success';
+          msgEl.textContent = 'Login successful! Redirecting...';
+          setTimeout(() => window.location.href = '/', 1000);
+        } else if (data.needsVerification) {
+          pendingEmail = email;
+          document.getElementById('otp-section').style.display = 'block';
+          msgEl.className = 'auth-msg auth-msg--error';
+          msgEl.textContent = data.message;
+        } else {
+          msgEl.className = 'auth-msg auth-msg--error';
+          msgEl.textContent = data.message;
+        }
+      } catch (err) {
+        msgEl.className = 'auth-msg auth-msg--error';
+        msgEl.textContent = 'Server unreachable. Make sure backend is running.';
+      }
+    });
+
+    // ═══ OTP VERIFICATION ═══
+    document.getElementById('btn-verify-otp').addEventListener('click', async () => {
+      const code = document.getElementById('otp-code').value.trim();
+      const msgEl = document.getElementById('user-msg');
+      if (!code || code.length !== 6) { msgEl.className = 'auth-msg auth-msg--error'; msgEl.textContent = 'Enter 6-digit code'; return; }
+
+      try {
+        const res = await fetch(`${API}/auth/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: pendingEmail, code }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          msgEl.className = 'auth-msg auth-msg--success';
+          msgEl.textContent = 'Verified! Redirecting...';
+          setTimeout(() => window.location.href = '/', 1000);
+        } else {
+          msgEl.className = 'auth-msg auth-msg--error';
+          msgEl.textContent = data.message;
+        }
+      } catch (err) {
+        msgEl.className = 'auth-msg auth-msg--error';
+        msgEl.textContent = 'Verification failed';
+      }
+    });
+
+    // ═══ GOOGLE SIGN-IN ═══
+    let googleReady = false;
+
+    async function initGoogle() {
+      try {
+        const res = await fetch(`${API}/auth/google-client-id`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.clientId) return;
+
+        window.__GOOGLE_CLIENT_ID = data.clientId;
+
+        // Wait for Google script to load
+        const waitForGoogle = () => new Promise((resolve) => {
+          if (window.google?.accounts) return resolve();
+          const check = setInterval(() => {
+            if (window.google?.accounts) { clearInterval(check); resolve(); }
+          }, 200);
+          // Timeout after 5s
+          setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+        });
+
+        await waitForGoogle();
+
+        if (!window.google?.accounts) return;
+
+        google.accounts.id.initialize({
+          client_id: data.clientId,
+          callback: handleGoogleResponse,
+          auto_select: false,
+        });
+
+        // Render the Google button inside the container
+        const btnContainer = document.getElementById('btn-google-login');
+        if (btnContainer) {
+          google.accounts.id.renderButton(btnContainer, {
+            theme: 'filled_black',
+            size: 'large',
+            width: 360,
+            text: 'signin_with',
+            shape: 'pill',
+          });
+        }
+
+        googleReady = true;
+      } catch (e) {
+        console.warn('[Google Auth] Init failed:', e.message);
+      }
+    }
+
+    async function handleGoogleResponse(response) {
+      const msgEl = document.getElementById('user-msg');
+      try {
+        const res = await fetch(`${API}/auth/google`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential: response.credential }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          msgEl.className = 'auth-msg auth-msg--success';
+          msgEl.textContent = 'Welcome! Redirecting...';
+          setTimeout(() => window.location.href = '/', 1000);
+        } else {
+          msgEl.className = 'auth-msg auth-msg--error';
+          msgEl.textContent = data.message;
+        }
+      } catch (err) {
+        msgEl.className = 'auth-msg auth-msg--error';
+        msgEl.textContent = 'Google sign-in failed';
+      }
+    }
+
+    // Initialize Google on page load
+    initGoogle();
+
+    // ═══ ADMIN LOGIN ═══
+    document.getElementById('form-admin-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const secret = document.getElementById('admin-secret').value.trim();
+      const msgEl = document.getElementById('admin-msg');
+
+      try {
+        const res = await fetch(`${API}/admin/dashboard`, {
+          headers: { 'x-admin-secret': secret }
+        });
+        if (res.ok) {
+          sessionStorage.setItem('adminToken', secret);
+          msgEl.className = 'auth-msg auth-msg--success';
+          msgEl.textContent = 'Access granted! Redirecting...';
+          setTimeout(() => window.location.href = '/admin.html', 1000);
+        } else {
+          msgEl.className = 'auth-msg auth-msg--error';
+          msgEl.textContent = 'Invalid admin credentials';
+        }
+      } catch (err) {
+        msgEl.className = 'auth-msg auth-msg--error';
+        msgEl.textContent = 'Server unreachable';
+      }
+    });
+
+    // ═══ REDIRECT IF ALREADY LOGGED IN ═══
+    if (localStorage.getItem('token')) {
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>

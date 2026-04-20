@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — FlyWithUS</title>
+  <meta name="description" content="Join FlyWithUS — Create your account and start booking flights worldwide." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080d1a;
+      --bg-card: rgba(13,22,40,0.85);
+      --border: rgba(255,255,255,0.06);
+      --cream: #f5e6c8;
+      --blue: #4a8bb5;
+      --blue-glow: rgba(74,139,181,0.25);
+      --green: #6dd5a0;
+      --red: #e76e6e;
+      --white: #eae5dc;
+      --white-70: rgba(234,229,220,0.7);
+      --white-50: rgba(234,229,220,0.5);
+      --white-30: rgba(234,229,220,0.3);
+      --white-10: rgba(234,229,220,0.1);
+      --white-05: rgba(234,229,220,0.05);
+      --font-display: 'Instrument Serif', serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-y: auto;
+    }
+
+    .auth-bg { position: fixed; inset: 0; z-index: 0; }
+    .auth-bg__img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.3) saturate(1.2); }
+    .auth-bg__overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(8,13,26,0.85), rgba(8,13,26,0.6), rgba(74,139,181,0.1)); }
+
+    .auth-wrapper { position: relative; z-index: 10; width: 100%; max-width: 440px; padding: 20px; margin: 40px 0; }
+
+    .auth-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+    }
+
+    .auth-card__logo { text-align: center; margin-bottom: 28px; }
+    .auth-card__logo a { font-family: var(--font-display); font-size: 28px; color: var(--cream); text-decoration: none; }
+    .auth-card__logo-sub { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--white-30); margin-top: 4px; }
+
+    .auth-field { margin-bottom: 14px; }
+    .auth-field label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--white-30); margin-bottom: 6px; }
+    .auth-field input { width: 100%; background: var(--white-05); border: 1px solid var(--white-10); border-radius: 12px; padding: 14px 16px; font-family: var(--font-body); font-size: 14px; color: var(--white); outline: none; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+    .auth-field input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
+
+    .auth-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, var(--blue), #3a7a9a); color: var(--cream); font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.3s ease; margin-top: 8px; }
+    .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--blue-glow); }
+    .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .auth-divider { display: flex; align-items: center; gap: 16px; margin: 18px 0; color: var(--white-30); font-size: 12px; }
+    .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--white-10); }
+
+    .google-btn { width: 100%; padding: 12px; border: 1px solid var(--white-10); border-radius: 12px; background: var(--white-05); color: var(--white); font-family: var(--font-body); font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; }
+    .google-btn:hover { background: var(--white-10); border-color: var(--white-30); }
+    .google-btn svg { width: 18px; height: 18px; }
+
+    .auth-msg { text-align: center; font-size: 13px; margin-top: 12px; padding: 10px; border-radius: 10px; display: none; }
+    .auth-msg--error { background: rgba(231,110,110,0.1); color: var(--red); display: block; }
+    .auth-msg--success { background: rgba(109,213,160,0.1); color: var(--green); display: block; }
+
+    .auth-footer { text-align: center; margin-top: 20px; font-size: 13px; color: var(--white-30); }
+    .auth-footer a { color: var(--blue); text-decoration: none; font-weight: 600; }
+
+    .auth-back { display: inline-flex; align-items: center; gap: 6px; color: var(--white-30); text-decoration: none; font-size: 13px; margin-bottom: 16px; transition: color 0.3s ease; }
+    .auth-back:hover { color: var(--cream); }
+
+    /* Steps */
+    .step { display: none; }
+    .step.active { display: block; }
+
+    .otp-input { text-align: center; font-size: 28px; letter-spacing: 10px; font-weight: 700; }
+
+    .password-reqs { font-size: 11px; color: var(--white-30); margin-top: 4px; }
+
+    /* Success animation */
+    .success-check { text-align: center; padding: 32px 0; }
+    .success-check svg { width: 72px; height: 72px; }
+    .success-check__circle { fill: none; stroke: var(--green); stroke-width: 2; stroke-dasharray: 166; stroke-dashoffset: 166; animation: checkStroke 0.6s ease forwards; }
+    .success-check__path { fill: none; stroke: var(--green); stroke-width: 3; stroke-dasharray: 48; stroke-dashoffset: 48; animation: checkStroke 0.3s 0.4s ease forwards; }
+    @keyframes checkStroke { to { stroke-dashoffset: 0; } }
+
+    .success-text { text-align: center; }
+    .success-text h3 { font-family: var(--font-display); font-size: 22px; color: var(--cream); margin-bottom: 8px; }
+    .success-text p { font-size: 13px; color: var(--white-50); }
+
+    @media (max-width: 480px) { .auth-card { padding: 28px 20px; } }
+  </style>
+</head>
+<body>
+
+  <div class="auth-bg">
+    <img src="/plane-bg.png" alt="" class="auth-bg__img" />
+    <div class="auth-bg__overlay"></div>
+  </div>
+
+  <div class="auth-wrapper">
+    <a href="/" class="auth-back">← Back to FlyWithUS</a>
+
+    <div class="auth-card">
+      <div class="auth-card__logo">
+        <a href="/">FlyWithUS</a>
+        <p class="auth-card__logo-sub">Create your account</p>
+      </div>
+
+      <!-- STEP 1: Registration Form -->
+      <div class="step active" id="step-register">
+        <button class="google-btn" id="btn-google-register">
+          <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Sign up with Google
+        </button>
+
+        <div class="auth-divider">or register with email</div>
+
+        <form id="form-register">
+          <div class="auth-field">
+            <label>Full Name</label>
+            <input type="text" id="reg-name" placeholder="John Doe" required />
+          </div>
+          <div class="auth-field">
+            <label>Email</label>
+            <input type="email" id="reg-email" placeholder="your@email.com" required />
+          </div>
+          <div class="auth-field">
+            <label>Password</label>
+            <input type="password" id="reg-password" placeholder="Min 6 characters" required minlength="6" />
+            <p class="password-reqs">At least 6 characters</p>
+          </div>
+          <div class="auth-field">
+            <label>Confirm Password</label>
+            <input type="password" id="reg-confirm" placeholder="Re-enter password" required />
+          </div>
+          <button type="submit" class="auth-btn">Create Account</button>
+        </form>
+
+        <div class="auth-msg" id="reg-msg"></div>
+
+        <div class="auth-footer">
+          Already have an account? <a href="/login.html">Sign in</a>
+        </div>
+      </div>
+
+      <!-- STEP 2: OTP Verification -->
+      <div class="step" id="step-verify">
+        <div style="text-align:center; margin-bottom:24px;">
+          <p style="font-size:14px; color:var(--white-70);">We've sent a 6-digit code to</p>
+          <p style="font-size:15px; color:var(--cream); font-weight:600; margin-top:4px;" id="verify-email-display"></p>
+        </div>
+
+        <div class="auth-field">
+          <label>Verification Code</label>
+          <input type="text" id="verify-code" class="otp-input" placeholder="000000" maxlength="6" />
+        </div>
+        <button class="auth-btn" id="btn-verify">Verify Email</button>
+
+        <div class="auth-msg" id="verify-msg"></div>
+
+        <div class="auth-footer" style="margin-top:16px;">
+          Didn't get the code? <a href="#" id="btn-resend">Resend</a>
+        </div>
+      </div>
+
+      <!-- STEP 3: Success -->
+      <div class="step" id="step-success">
+        <div class="success-check">
+          <svg viewBox="0 0 52 52">
+            <circle class="success-check__circle" cx="26" cy="26" r="25"/>
+            <path class="success-check__path" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+          </svg>
+        </div>
+        <div class="success-text">
+          <h3>Welcome aboard!</h3>
+          <p>Your account has been verified. Redirecting to FlyWithUS...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    const API = '/api';
+    let regEmail = '';
+
+    function showStep(id) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // ═══ REGISTER ═══
+    document.getElementById('form-register').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const confirm = document.getElementById('reg-confirm').value;
+      const msgEl = document.getElementById('reg-msg');
+
+      if (password !== confirm) {
+        msgEl.className = 'auth-msg auth-msg--error';
+        msgEl.textContent = 'Passwords do not match';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password }),
+        });
+        const data = await res.json();
+
+        if (data.success && data.needsVerification) {
+          regEmail = email;
+          document.getElementById('verify-email-display').textContent = email;
+          showStep('step-verify');
+        } else if (!data.success) {
+          msgEl.className = 'auth-msg auth-msg--error';
+          msgEl.textContent = data.message;
+        }
+      } catch (err) {
+        msgEl.className = 'auth-msg auth-msg--error';
+        msgEl.textContent = 'Server unreachable';
+      }
+    });
+
+    // ═══ VERIFY OTP ═══
+    document.getElementById('btn-verify').addEventListener('click', async () => {
+      const code = document.getElementById('verify-code').value.trim();
+      const msgEl = document.getElementById('verify-msg');
+
+      if (code.length !== 6) {
+        msgEl.className = 'auth-msg auth-msg--error';
+        msgEl.textContent = 'Enter the 6-digit code';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API}/auth/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: regEmail, code }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          showStep('step-success');
+          setTimeout(() => window.location.href = '/', 2000);
+        } else {
+          msgEl.className = 'auth-msg auth-msg--error';
+          msgEl.textContent = data.message;
+        }
+      } catch (err) {
+        msgEl.className = 'auth-msg auth-msg--error';
+        msgEl.textContent = 'Verification failed';
+      }
+    });
+
+    // ═══ RESEND CODE ═══
+    document.getElementById('btn-resend').addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        await fetch(`${API}/auth/resend`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: regEmail }),
+        });
+        const msgEl = document.getElementById('verify-msg');
+        msgEl.className = 'auth-msg auth-msg--success';
+        msgEl.textContent = 'New code sent!';
+      } catch (err) {}
+    });
+
+    // ═══ GOOGLE SIGN-UP ═══
+    async function handleGoogleResponse(response) {
+      try {
+        const res = await fetch(`${API}/auth/google`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential: response.credential }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          showStep('step-success');
+          setTimeout(() => window.location.href = '/', 2000);
+        }
+      } catch (err) {
+        document.getElementById('reg-msg').className = 'auth-msg auth-msg--error';
+        document.getElementById('reg-msg').textContent = 'Google sign-up failed';
+      }
+    }
+
+    // Init Google button
+    async function initGoogle() {
+      try {
+        const res = await fetch(`${API}/auth/google-client-id`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.clientId) return;
+
+        window.__GOOGLE_CLIENT_ID = data.clientId;
+
+        // Wait for Google script to load
+        const waitForGoogle = () => new Promise((resolve) => {
+          if (window.google?.accounts) return resolve();
+          const check = setInterval(() => {
+            if (window.google?.accounts) { clearInterval(check); resolve(); }
+          }, 200);
+          setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+        });
+
+        await waitForGoogle();
+        if (!window.google?.accounts) return;
+
+        google.accounts.id.initialize({
+          client_id: data.clientId,
+          callback: handleGoogleResponse,
+        });
+
+        const btnContainer = document.getElementById('btn-google-register');
+        if (btnContainer) {
+          google.accounts.id.renderButton(btnContainer, {
+            theme: 'filled_black',
+            size: 'large',
+            width: 360,
+            text: 'signup_with',
+            shape: 'pill',
+          });
+        }
+      } catch (e) {
+        console.warn('[Google Auth] Init failed:', e.message);
+      }
+    }
+
+    initGoogle();
+
+    // Redirect if logged in
+    if (localStorage.getItem('token')) window.location.href = '/';
+  </script>
+</body>
+</html>

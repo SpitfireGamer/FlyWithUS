@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — FlyWithUS</title>
+  <meta name="description" content="FlyWithUS Admin Dashboard — Manage bookings, users, revenue, and monitor operations." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080d1a;
+      --bg-card: #0d1628;
+      --bg-hover: #121d35;
+      --border: rgba(255,255,255,0.06);
+      --cream: #f5e6c8;
+      --cream-dim: rgba(245,230,200,0.5);
+      --blue: #4a8bb5;
+      --blue-glow: rgba(74,139,181,0.25);
+      --green: #6dd5a0;
+      --red: #e76e6e;
+      --yellow: #f5d76e;
+      --white: #eae5dc;
+      --white-70: rgba(234,229,220,0.7);
+      --white-50: rgba(234,229,220,0.5);
+      --white-30: rgba(234,229,220,0.3);
+      --white-10: rgba(234,229,220,0.1);
+      --white-05: rgba(234,229,220,0.05);
+      --font-display: 'Instrument Serif', serif;
+      --font-body: 'DM Sans', sans-serif;
+      --radius: 16px;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--white);
+      min-height: 100vh;
+    }
+
+    /* ─── Login Screen ─── */
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at center, rgba(74,139,181,0.05), transparent), var(--bg);
+    }
+
+    .login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 48px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    .login-card__logo {
+      font-family: var(--font-display);
+      font-size: 28px;
+      color: var(--cream);
+      margin-bottom: 8px;
+    }
+
+    .login-card__sub {
+      font-size: 14px;
+      color: var(--white-30);
+      margin-bottom: 32px;
+    }
+
+    .login-card__field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+      margin-bottom: 16px;
+    }
+
+    .login-card__field label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--white-30);
+    }
+
+    .login-card__field input {
+      background: var(--white-05);
+      border: 1px solid var(--white-10);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    .login-card__field input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-glow);
+    }
+
+    .login-card__btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--blue), #3a7a9a);
+      color: var(--cream);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      margin-top: 8px;
+    }
+
+    .login-card__btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px var(--blue-glow);
+    }
+
+    .login-card__error {
+      color: var(--red);
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    /* ─── Dashboard Layout ─── */
+    .dashboard { display: none; min-height: 100vh; }
+    .dashboard.active { display: block; }
+    .login-screen.hidden { display: none; }
+
+    .dash-header {
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,13,26,0.8);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .dash-header__left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .dash-header__logo {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--cream);
+    }
+
+    .dash-header__badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--blue);
+      background: var(--blue-glow);
+      padding: 4px 10px;
+      border-radius: 100px;
+    }
+
+    .dash-header__right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .dash-header__home {
+      font-size: 13px;
+      color: var(--white-50);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .dash-header__home:hover { color: var(--cream); }
+
+    .dash-header__logout {
+      font-size: 13px;
+      color: var(--red);
+      background: none;
+      border: 1px solid rgba(231,110,110,0.2);
+      padding: 6px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all 0.3s ease;
+    }
+
+    .dash-header__logout:hover {
+      background: rgba(231,110,110,0.1);
+    }
+
+    /* ─── Tab Navigation ─── */
+    .dash-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+      background: var(--white-05);
+      border-radius: 12px;
+      padding: 4px;
+      width: fit-content;
+    }
+
+    .dash-tab {
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white-50);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      font-family: var(--font-body);
+      transition: all 0.3s ease;
+    }
+
+    .dash-tab.active {
+      background: linear-gradient(135deg, var(--blue), #3a7a9a);
+      color: var(--cream);
+    }
+
+    .dash-tab:hover:not(.active) {
+      color: var(--white);
+      background: var(--white-05);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ─── Stats Grid ─── */
+    .dash-content {
+      padding: 32px 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--blue-glow);
+    }
+
+    .stat-card__label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--white-30);
+      margin-bottom: 8px;
+    }
+
+    .stat-card__value {
+      font-family: var(--font-display);
+      font-size: 36px;
+      color: var(--cream);
+    }
+
+    .stat-card__sub {
+      font-size: 12px;
+      color: var(--white-30);
+      margin-top: 4px;
+    }
+
+    /* ─── Tables ─── */
+    .dash-section {
+      margin-bottom: 32px;
+    }
+
+    .dash-section__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .dash-section__title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      color: var(--cream);
+    }
+
+    .dash-section__controls {
+      display: flex;
+      gap: 12px;
+    }
+
+    .dash-section__search {
+      background: var(--white-05);
+      border: 1px solid var(--white-10);
+      border-radius: 10px;
+      padding: 8px 16px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--white);
+      outline: none;
+      width: 260px;
+      transition: border-color 0.3s ease;
+    }
+
+    .dash-section__search:focus {
+      border-color: var(--blue);
+    }
+
+    .dash-btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .dash-btn--primary {
+      background: linear-gradient(135deg, var(--blue), #3a7a9a);
+      color: var(--cream);
+    }
+
+    .dash-btn--primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px var(--blue-glow);
+    }
+
+    .dash-btn--ghost {
+      background: var(--white-05);
+      color: var(--white-50);
+      border: 1px solid var(--white-10);
+    }
+
+    .dash-btn--ghost:hover {
+      background: var(--white-10);
+      color: var(--white);
+    }
+
+    .data-table {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .data-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: 14px 20px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--white-30);
+      border-bottom: 1px solid var(--border);
+      background: var(--white-05);
+    }
+
+    .data-table td {
+      padding: 14px 20px;
+      font-size: 13px;
+      color: var(--white-70);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table tr:last-child td { border-bottom: none; }
+
+    .data-table tr:hover td {
+      background: var(--white-05);
+    }
+
+    .pnr-badge {
+      font-weight: 700;
+      color: var(--cream);
+      background: var(--white-05);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .status-badge--confirmed {
+      background: rgba(109,213,160,0.15);
+      color: var(--green);
+    }
+
+    .status-badge--cancelled {
+      background: rgba(231,110,110,0.15);
+      color: var(--red);
+    }
+
+    .status-badge--pending {
+      background: rgba(245,230,200,0.1);
+      color: var(--cream-dim);
+    }
+
+    .status-badge--verified {
+      background: rgba(109,213,160,0.15);
+      color: var(--green);
+    }
+
+    .status-badge--unverified {
+      background: rgba(245,215,110,0.15);
+      color: var(--yellow);
+    }
+
+    .auth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .auth-badge--google {
+      background: rgba(66,133,244,0.15);
+      color: #4285f4;
+    }
+
+    .auth-badge--email {
+      background: rgba(245,230,200,0.1);
+      color: var(--cream-dim);
+    }
+
+    .action-btn {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--white-10);
+      background: transparent;
+      color: var(--white-50);
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background: var(--white-05);
+      color: var(--white);
+    }
+
+    .action-btn--cancel {
+      border-color: rgba(231,110,110,0.3);
+      color: var(--red);
+    }
+
+    .action-btn--cancel:hover {
+      background: rgba(231,110,110,0.1);
+    }
+
+    /* ─── Charts Section ─── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .chart-card__title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--white-30);
+      margin-bottom: 16px;
+    }
+
+    .chart-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .chart-bar__label {
+      font-size: 12px;
+      color: var(--white-50);
+      width: 100px;
+      text-align: right;
+    }
+
+    .chart-bar__track {
+      flex: 1;
+      height: 8px;
+      background: var(--white-05);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .chart-bar__fill {
+      height: 100%;
+      border-radius: 100px;
+      transition: width 1s ease;
+    }
+
+    .chart-bar__value {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--white-70);
+      width: 40px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--white-30);
+    }
+
+    .empty-state p { margin-top: 8px; font-size: 14px; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .charts-grid { grid-template-columns: 1fr; }
+      .dash-content { padding: 24px 20px; }
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .dash-header { padding: 16px 20px; flex-wrap: wrap; gap: 12px; }
+      .data-table { overflow-x: auto; }
+      .data-table table { min-width: 700px; }
+      .dash-section__controls { flex-direction: column; }
+      .dash-section__search { width: 100%; }
+      .dash-tabs { width: 100%; }
+      .dash-tab { flex: 1; text-align: center; }
+      .login-card { margin: 20px; padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ LOGIN SCREEN ═══ -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-card">
+      <div class="login-card__logo">FlyWithUS</div>
+      <p class="login-card__sub">Admin Dashboard Login</p>
+      <div class="login-card__field">
+        <label>Username</label>
+        <input type="text" id="admin-username" placeholder="Enter admin username" />
+      </div>
+      <div class="login-card__field">
+        <label>Password</label>
+        <input type="password" id="admin-password" placeholder="Enter admin password" />
+      </div>
+      <button class="login-card__btn" id="btn-login">Sign In</button>
+      <p class="login-card__error" id="login-error">Invalid admin credentials</p>
+    </div>
+  </div>
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div class="dashboard" id="dashboard">
+    <!-- Header -->
+    <header class="dash-header">
+      <div class="dash-header__left">
+        <div class="dash-header__logo">FlyWithUS</div>
+        <span class="dash-header__badge">Admin</span>
+      </div>
+      <div class="dash-header__right">
+        <a href="/" class="dash-header__home">← Back to Website</a>
+        <button class="dash-header__logout" id="btn-logout">Sign Out</button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="dash-content">
+      <!-- Stats -->
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card__label">Total Bookings</div>
+          <div class="stat-card__value" id="stat-total">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Total Revenue</div>
+          <div class="stat-card__value" id="stat-revenue">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Registered Users</div>
+          <div class="stat-card__value" id="stat-users">—</div>
+          <div class="stat-card__sub" id="stat-users-sub"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__label">Active Airports</div>
+          <div class="stat-card__value" id="stat-airports">—</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="dash-tabs">
+        <button class="dash-tab active" data-tab="bookings">Bookings</button>
+        <button class="dash-tab" data-tab="users">Users</button>
+        <button class="dash-tab" data-tab="analytics">Analytics</button>
+      </div>
+
+      <!-- Bookings Panel -->
+      <div class="tab-panel active" id="panel-bookings">
+        <div class="dash-section">
+          <div class="dash-section__header">
+            <span class="dash-section__title">All Bookings</span>
+            <div class="dash-section__controls">
+              <input type="text" class="dash-section__search" id="booking-search" placeholder="Search by PNR, email, route..." />
+              <button class="dash-btn dash-btn--ghost" id="btn-refresh-bookings">↻ Refresh</button>
+            </div>
+          </div>
+          <div class="data-table" id="bookings-table">
+            <div class="empty-state">
+              <p>Loading bookings...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Panel -->
+      <div class="tab-panel" id="panel-users">
+        <div class="dash-section">
+          <div class="dash-section__header">
+            <span class="dash-section__title">Registered Users</span>
+            <div class="dash-section__controls">
+              <input type="text" class="dash-section__search" id="user-search" placeholder="Search by name or email..." />
+              <button class="dash-btn dash-btn--ghost" id="btn-refresh-users">↻ Refresh</button>
+            </div>
+          </div>
+          <div class="data-table" id="users-table">
+            <div class="empty-state">
+              <p>Loading users...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics Panel -->
+      <div class="tab-panel" id="panel-analytics">
+        <div class="dash-section">
+          <div class="charts-grid" id="charts-area">
+            <div class="chart-card">
+              <div class="chart-card__title">Revenue by Class</div>
+              <div id="chart-classes"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-card__title">Top Routes</div>
+              <div id="chart-routes"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    const API = '/api';
+    let adminToken = '';
+    let allBookings = [];
+    let allUsers = [];
+
+    // ═══ TABS ═══
+    document.querySelectorAll('.dash-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+      });
+    });
+
+    // ═══ LOGIN ═══
+    document.getElementById('btn-login').addEventListener('click', login);
+    document.getElementById('admin-password').addEventListener('keypress', (e) => { if (e.key === 'Enter') login(); });
+
+    async function login() {
+      const username = document.getElementById('admin-username').value.trim();
+      const password = document.getElementById('admin-password').value.trim();
+      if (!username || !password) return;
+
+      try {
+        const res = await fetch(`${API}/admin/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          adminToken = data.token;
+          document.getElementById('login-screen').classList.add('hidden');
+          document.getElementById('dashboard').classList.add('active');
+          sessionStorage.setItem('adminToken', adminToken);
+          loadDashboard();
+        } else {
+          document.getElementById('login-error').style.display = 'block';
+          document.getElementById('login-error').textContent = data.message || 'Invalid credentials';
+        }
+      } catch (err) {
+        document.getElementById('login-error').textContent = 'Server unreachable. Start the backend.';
+        document.getElementById('login-error').style.display = 'block';
+      }
+    }
+
+    // ═══ AUTO-LOGIN ═══
+    const cached = sessionStorage.getItem('adminToken');
+    if (cached) {
+      adminToken = cached;
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('dashboard').classList.add('active');
+      loadDashboard();
+    }
+
+    // ═══ LOGOUT ═══
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      sessionStorage.removeItem('adminToken');
+      location.reload();
+    });
+
+    // ═══ LOAD DASHBOARD ═══
+    async function loadDashboard() {
+      await Promise.all([loadStats(), loadBookings(), loadUsers()]);
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch(`${API}/admin/dashboard`, {
+          headers: { 'x-admin-secret': adminToken }
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          const d = data.data;
+          const s = d.stats || {};
+          document.getElementById('stat-total').textContent = (s.totalBookings || 0).toLocaleString();
+          document.getElementById('stat-revenue').textContent = '$' + (s.totalRevenue || 0).toLocaleString();
+          document.getElementById('stat-users').textContent = (s.totalUsers || 0).toLocaleString();
+          document.getElementById('stat-users-sub').textContent = `${s.verifiedUsers || 0} verified · ${s.googleUsers || 0} Google`;
+          document.getElementById('stat-airports').textContent = s.totalAirports || '—';
+
+          renderClassChart(d.classDistribution || []);
+          renderRouteChart(d.popularRoutes || []);
+        }
+      } catch (err) {
+        console.error('Stats error:', err);
+      }
+    }
+
+    // ═══ BOOKINGS ═══
+    async function loadBookings() {
+      try {
+        const res = await fetch(`${API}/admin/bookings`, {
+          headers: { 'x-admin-secret': adminToken }
+        });
+        const data = await res.json();
+        if (data.success) {
+          allBookings = data.data || [];
+          renderBookings(allBookings);
+        }
+      } catch (err) {
+        document.getElementById('bookings-table').innerHTML = '<div class="empty-state"><p>Failed to load bookings</p></div>';
+      }
+    }
+
+    function renderBookings(bookings) {
+      const el = document.getElementById('bookings-table');
+      if (bookings.length === 0) {
+        el.innerHTML = '<div class="empty-state"><p>No bookings yet</p><p>Bookings will appear here once customers start booking flights.</p></div>';
+        return;
+      }
+
+      el.innerHTML = `<table>
+        <thead>
+          <tr>
+            <th>PNR</th>
+            <th>Passenger</th>
+            <th>Email</th>
+            <th>Route</th>
+            <th>Date</th>
+            <th>Class</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${bookings.map(b => `
+            <tr>
+              <td><span class="pnr-badge">${b.pnr}</span></td>
+              <td>${b.passengers?.[0]?.firstName || ''} ${b.passengers?.[0]?.lastName || ''}</td>
+              <td>${b.contactEmail || ''}</td>
+              <td><strong>${b.departureIata}</strong> → <strong>${b.destinationIata}</strong></td>
+              <td>${b.departureDate ? new Date(b.departureDate).toLocaleDateString() : ''}</td>
+              <td>${classLabel(b.travelClass)}</td>
+              <td><strong>$${b.totalPrice?.toLocaleString() || 0}</strong></td>
+              <td><span class="status-badge status-badge--${b.status}">${b.status}</span></td>
+              <td>
+                ${b.status === 'confirmed' ? `<button class="action-btn action-btn--cancel" onclick="cancelBooking('${b._id}')">Cancel</button>` : ''}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+    }
+
+    function classLabel(c) {
+      return { economy: 'Economy', premiumEconomy: 'Premium', business: 'Business', first: 'First' }[c] || c;
+    }
+
+    window.cancelBooking = async function(id) {
+      if (!confirm('Cancel this booking?')) return;
+      try {
+        const res = await fetch(`${API}/admin/bookings/${id}/cancel`, {
+          method: 'PATCH',
+          headers: { 'x-admin-secret': adminToken }
+        });
+        if (res.ok) loadBookings();
+      } catch (err) { console.error(err); }
+    };
+
+    document.getElementById('booking-search').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) { renderBookings(allBookings); return; }
+      const filtered = allBookings.filter(b =>
+        (b.pnr || '').toLowerCase().includes(q) ||
+        (b.contactEmail || '').toLowerCase().includes(q) ||
+        (b.departureIata || '').toLowerCase().includes(q) ||
+        (b.destinationIata || '').toLowerCase().includes(q)
+      );
+      renderBookings(filtered);
+    });
+
+    document.getElementById('btn-refresh-bookings').addEventListener('click', loadBookings);
+
+    // ═══ USERS ═══
+    async function loadUsers() {
+      try {
+        const res = await fetch(`${API}/admin/users`, {
+          headers: { 'x-admin-secret': adminToken }
+        });
+        const data = await res.json();
+        if (data.success) {
+          allUsers = data.data || [];
+          renderUsers(allUsers);
+        }
+      } catch (err) {
+        document.getElementById('users-table').innerHTML = '<div class="empty-state"><p>Failed to load users</p></div>';
+      }
+    }
+
+    function renderUsers(users) {
+      const el = document.getElementById('users-table');
+      if (users.length === 0) {
+        el.innerHTML = '<div class="empty-state"><p>No registered users yet</p></div>';
+        return;
+      }
+
+      el.innerHTML = `<table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Auth Method</th>
+            <th>Status</th>
+            <th>Role</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${users.map(u => `
+            <tr>
+              <td><strong>${u.name || '—'}</strong></td>
+              <td>${u.email}</td>
+              <td>
+                ${u.googleId
+                  ? '<span class="auth-badge auth-badge--google">✦ Google</span>'
+                  : '<span class="auth-badge auth-badge--email">✉ Email</span>'}
+              </td>
+              <td>
+                <span class="status-badge status-badge--${u.verified ? 'verified' : 'unverified'}">
+                  ${u.verified ? '✓ Verified' : '⏳ Pending'}
+                </span>
+              </td>
+              <td>${u.role || 'user'}</td>
+              <td>${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</td>
+              <td>
+                <button class="action-btn action-btn--cancel" onclick="deleteUser('${u._id}', '${u.email}')">Delete</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+    }
+
+    window.deleteUser = async function(id, email) {
+      if (!confirm(`Delete user ${email}? This action cannot be undone.`)) return;
+      try {
+        const res = await fetch(`${API}/admin/users/${id}`, {
+          method: 'DELETE',
+          headers: { 'x-admin-secret': adminToken }
+        });
+        if (res.ok) {
+          loadUsers();
+          loadStats();
+        }
+      } catch (err) { console.error(err); }
+    };
+
+    document.getElementById('user-search').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) { renderUsers(allUsers); return; }
+      const filtered = allUsers.filter(u =>
+        (u.name || '').toLowerCase().includes(q) ||
+        (u.email || '').toLowerCase().includes(q)
+      );
+      renderUsers(filtered);
+    });
+
+    document.getElementById('btn-refresh-users').addEventListener('click', loadUsers);
+
+    // ═══ CHARTS ═══
+    function renderClassChart(data) {
+      const el = document.getElementById('chart-classes');
+      if (!data.length) { el.innerHTML = '<p style="color:var(--white-30); font-size:13px;">No data</p>'; return; }
+
+      const max = Math.max(...data.map(d => d.count));
+      const colors = { economy: '#4a8bb5', premiumEconomy: '#6dd5a0', business: '#f5e6c8', first: '#e76e6e' };
+
+      el.innerHTML = data.map(d => `
+        <div class="chart-bar">
+          <span class="chart-bar__label">${classLabel(d._id)}</span>
+          <div class="chart-bar__track"><div class="chart-bar__fill" style="width: ${(d.count / max * 100)}%; background: ${colors[d._id] || '#4a8bb5'};"></div></div>
+          <span class="chart-bar__value">${d.count}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderRouteChart(data) {
+      const el = document.getElementById('chart-routes');
+      if (!data.length) { el.innerHTML = '<p style="color:var(--white-30); font-size:13px;">No data</p>'; return; }
+
+      const max = Math.max(...data.map(d => d.count));
+
+      el.innerHTML = data.map(d => `
+        <div class="chart-bar">
+          <span class="chart-bar__label">${d._id?.from || '?'} → ${d._id?.to || '?'}</span>
+          <div class="chart-bar__track"><div class="chart-bar__fill" style="width: ${(d.count / max * 100)}%; background: var(--blue);"></div></div>
+          <span class="chart-bar__value">${d.count}</span>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>
